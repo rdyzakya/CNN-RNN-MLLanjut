@@ -112,7 +112,7 @@ class Dense(Layer):
         try:
             np.random.seed(self.random_seed)
             self.weights = np.random.randn(input_dim, self.units)
-            self.input_shape = (input_dim,self.units)
+            self.input_shape = input_dim  #(input_dim,self.units)
         except Exception as e:
             print(input_dim)
             print(self.units)
@@ -569,7 +569,7 @@ class LSTM(Layer):
     [DESC]
         Class for LSTM Layer
     """
-    def __init__(self,units : int=32,input_shape : Tuple[int]=None, return_sequences : bool=False):
+    def __init__(self,units : int=32,input_shape : Tuple[int]=None, return_sequences : bool=False, random_seed : int=None):
         """
         [DESC]
             Constructor
@@ -583,11 +583,131 @@ class LSTM(Layer):
         """
         super().__init__()
         self.units = units
-        self.input_shape = input_shape
         self.return_sequences = return_sequences
-        self.input_dim = None
-        self.output_dim = None
+        if isinstance(input_shape, tuple):
+            self.input_shape = input_shape if len(input_shape) == 2 else (input_shape[1],input_shape[2])
+            self.output_dim = units if not return_sequences else (input_shape[0],units)
+        else:
+            self.input_shape = input_shape
+            self.output_dim = units if not return_sequences else (input_shape,units)
         self.input = None
-        self.hidden_state = None
-        self.cell_state = None
-        self.output = None
+        self.hidden_state = np.zeros((self.units,))
+        self.cell_state = np.zeros((self.units,))
+        self.output = self.units
+        self.random_seed = random_seed
+    
+    def set_weight_and_bias(self, input_dim: Tuple[int]):
+        np.random.seed(self.random_seed)
+        if len(input_dim) != 2:
+            raise ValueError("input dimension must be 2 (seq_length, feature_dimension)")
+        feature_dim = input_dim[1]
+        self.weights = {
+            "Uf" : np.random.randn(feature_dim, self.units),
+            "Ui" : np.random.randn(feature_dim, self.units),
+            "Uc" : np.random.randn(feature_dim, self.units),
+            "Uo" : np.random.randn(feature_dim, self.units),
+            "Wf" : np.random.randn(self.units, self.units),
+            "Wi" : np.random.randn(self.units, self.units),
+            "Wc" : np.random.randn(self.units, self.units),
+            "Wo" : np.random.randn(self.units, self.units),
+        }
+
+        self.bias = {
+            "bf" : np.random.randn(self.units),
+            "bi" : np.random.randn(self.units),
+            "bc" : np.random.randn(self.units),
+            "bo" : np.random.randn(self.units),
+        }
+        return super().set_weight_and_bias(input_dim)
+    
+    def _count_input_gate(self,x : np.ndarray) -> np.ndarray:
+        """
+        [DESC]
+            Count input gate
+        [PARAMS]
+            x : np.ndarray
+                Input
+        [RETURN]
+            np.ndarray
+                Output
+        """
+        it = sigmoid(np.dot(x,self.weights["Ui"]) + np.dot(self.hidden_state,self.weights["Wi"]) + self.bias["bi"])
+        return it
+    
+    def _count_candidate_cell_state(self,x : np.ndarray) -> np.ndarray:
+        """
+        [DESC]
+            Count candidate cell state
+        [PARAMS]
+            x : np.ndarray
+                Input
+        [RETURN]
+            np.ndarray
+                Output
+        """
+        candidate_t = tanh(np.dot(x,self.weights["Uc"]) + np.dot(self.hidden_state,self.weights["Wc"]) + self.bias["bc"])
+        return candidate_t
+    
+    def _count_forget_gate(self,x : np.ndarray) -> np.ndarray:
+        """
+        [DESC]
+            Count forget gate
+        [PARAMS]
+            x : np.ndarray
+                Input
+        [RETURN]
+            np.ndarray
+                Output
+        """
+        ft = sigmoid(np.dot(x,self.weights["Uf"]) + np.dot(self.hidden_state,self.weights["Wf"]) + self.bias["bf"])
+        return ft
+    
+    def _count_output_gate(self,x : np.ndarray) -> np.ndarray:
+        """
+        [DESC]
+            Count output gate
+        [PARAMS]
+            x : np.ndarray
+                Input
+        [RETURN]
+            np.ndarray
+                Output
+        """
+        ot = sigmoid(np.dot(x,self.weights["Uo"]) + np.dot(self.hidden_state,self.weights["Wo"]) + self.bias["bo"])
+        return ot
+    
+    def _count_cell_state(self,ft : np.ndarray,it : np.ndarray,candidate_t : np.ndarray) -> np.ndarray:
+        """
+        [DESC]
+            Count cell state
+        [PARAMS]
+            ft : np.ndarray
+                Forget gate
+            it : np.ndarray
+                Input gate
+            candidate_t : np.ndarray
+                Candidate cell state
+        [RETURN]
+            np.ndarray
+                Output
+        """
+        ct = ft * self.cell_state + it * candidate_t
+        self.cell_state = ct
+        return ct
+    
+    def _count_hidden_state(self,ot : np.ndarray,ct : np.ndarray) -> np.ndarray:
+        """
+        [DESC]
+            Count hidden state
+        [PARAMS]
+            ot : np.ndarray
+                Output gate
+            ct : np.ndarray
+                Cell state
+        [RETURN]
+            np.ndarray
+                Output
+        """
+        ht = ot * tanh(ct)
+        self.hidden_state = ht
+        return ht
