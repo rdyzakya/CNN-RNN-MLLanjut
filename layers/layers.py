@@ -723,18 +723,19 @@ class LSTM(Layer):
             np.ndarray
                 Output
         """
+        if len(x.shape) == 2:
+            x = x.reshape((1,*x.shape))
         self.input = x
         n_batch = x.shape[0]
         output = np.zeros((n_batch,x.shape[1],self.units))
-        for instance in range(n_batch):
-            for t in range(x.shape[1]):
-                it = self._count_input_gate(x[instance,t])
-                candidate_t = self._count_candidate_cell_state(x[instance,t])
-                ft = self._count_forget_gate(x[instance,t])
-                ot = self._count_output_gate(x[instance,t])
-                ct = self._count_cell_state(ft,it,candidate_t)
-                ht = self._count_hidden_state(ot,ct)
-                output[instance,t] = ht
+        for t in range(x.shape[1]):
+            it = self._count_input_gate(x[:,t])
+            candidate_t = self._count_candidate_cell_state(x[:,t])
+            ft = self._count_forget_gate(x[:,t])
+            ot = self._count_output_gate(x[:,t])
+            ct = self._count_cell_state(ft,it,candidate_t)
+            ht = self._count_hidden_state(ot,ct)
+            output[:,t] = ht
         if self.return_sequences:
             self.output = output
         else:
