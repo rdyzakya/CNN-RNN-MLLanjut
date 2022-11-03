@@ -711,3 +711,32 @@ class LSTM(Layer):
         ht = ot * tanh(ct)
         self.hidden_state = ht
         return ht
+    
+    def forward(self,x : np.ndarray) -> np.ndarray:
+        """
+        [DESC]
+            Forward pass
+        [PARAMS]
+            x : np.ndarray
+                Input
+        [RETURN]
+            np.ndarray
+                Output
+        """
+        self.input = x
+        n_batch = x.shape[0]
+        output = np.zeros((n_batch,x.shape[1],self.units))
+        for instance in range(n_batch):
+            for t in range(x.shape[1]):
+                it = self._count_input_gate(x[instance,t])
+                candidate_t = self._count_candidate_cell_state(x[instance,t])
+                ft = self._count_forget_gate(x[instance,t])
+                ot = self._count_output_gate(x[instance,t])
+                ct = self._count_cell_state(ft,it,candidate_t)
+                ht = self._count_hidden_state(ot,ct)
+                output[instance,t] = ht
+        if self.return_sequences:
+            self.output = output
+        else:
+            self.output = output[:,-1]
+        return self.output

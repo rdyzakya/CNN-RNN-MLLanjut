@@ -16,5 +16,18 @@ def debug1():
 
     print(model.predict(data))
 
+def debug2():
+    lstm = LSTM(units=5, input_shape=(5, 20, 10), return_sequences=True, random_seed=0)
+
+    lstm.set_weight_and_bias((20,10))
+
+    x = np.random.random((5,20,10))
+
+    # print(lstm.weights)
+    # print("X : ", x)
+
+    print(lstm.forward(x))
+
 if __name__ == "__main__":
-    debug1()
+    # debug1()
+    debug2()
