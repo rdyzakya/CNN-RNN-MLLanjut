@@ -584,19 +584,17 @@ class LSTM(Layer):
         super().__init__()
         self.units = units
         self.return_sequences = return_sequences
-        if isinstance(input_shape, tuple):
+        self.random_seed = random_seed
+        if input_shape != None:
             self.input_shape = input_shape if len(input_shape) == 2 else (input_shape[1],input_shape[2])
-            self.output_dim = units if not return_sequences else (input_shape[0],units)
-        else:
-            self.input_shape = input_shape
-            self.output_dim = units if not return_sequences else (input_shape,units)
+            self.set_weight_and_bias(self.input_shape)
         self.input = None
         self.hidden_state = np.zeros((self.units,))
         self.cell_state = np.zeros((self.units,))
         self.output = self.units
-        self.random_seed = random_seed
     
     def set_weight_and_bias(self, input_dim: Tuple[int]):
+        self.input_shape = input_dim
         np.random.seed(self.random_seed)
         if len(input_dim) != 2:
             raise ValueError("input dimension must be 2 (seq_length, feature_dimension)")
@@ -618,6 +616,7 @@ class LSTM(Layer):
             "bc" : np.random.randn(self.units),
             "bo" : np.random.randn(self.units),
         }
+        self.output_dim = self.units if not self.return_sequences else (input_dim[0],self.units)
         return super().set_weight_and_bias(input_dim)
     
     def _count_input_gate(self,x : np.ndarray) -> np.ndarray:

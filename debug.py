@@ -28,6 +28,20 @@ def debug2():
 
     print(lstm.forward(x))
 
+def debug3():
+    model = Sequential()
+    lstm1 = LSTM(units=5, input_shape=(5, 20, 10), return_sequences=True, random_seed=0)
+    model.add(lstm1)
+    lstm2 = LSTM(units=5, return_sequences=False, random_seed=0)
+    model.add(lstm2)
+    # dense = Dense(units=1, activation='sigmoid')
+    # model.add(dense)
+
+    data = np.random.random((5, 20, 10))
+
+    print(model.predict(data))
+
 if __name__ == "__main__":
     # debug1()
-    debug2()
+    # debug2()
+    debug3()
