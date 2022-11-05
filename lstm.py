@@ -8,7 +8,7 @@ import pandas as pd
 def create_model(random_seed_1:int,random_seed_2:int):
     model = Sequential()
         
-    lstm1 = LSTM(units=5, input_shape=(1, 5, 1), return_sequences=True, random_seed=random_seed_1)    
+    lstm1 = LSTM(units=5, input_shape=(1, 32, 1), return_sequences=True, random_seed=random_seed_1)    
     
     model.add(lstm1)
     lstm2 = LSTM(units=5, return_sequences=False, random_seed=random_seed_2)      
@@ -66,6 +66,6 @@ if __name__ == "__main__":
     df = pd.DataFrame()
     for i in columns:        
         model_copy = model
-        df[i] = autoregressive_forecast(train,test,i,5,model_copy,derivative=0)    
+        df[i] = autoregressive_forecast(train,test,i,32,model_copy,derivative=0)    
     
     print(df.__repr__())
