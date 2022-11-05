@@ -140,7 +140,20 @@ def debug3():
     # # print(model.predict(data))
     print(df)
 
+def debug4():
+    model = Sequential()
+    lstm1 = LSTM(units=5, input_shape=(3, 5, 5), return_sequences=True, random_seed=0)
+    model.add(lstm1)
+    lstm2 = LSTM(units=5, return_sequences=False, random_seed=0)
+    model.add(lstm2)
+    dense = Dense(units=1, activation='sigmoid')
+    model.add(dense)
+
+    data = np.random.random((3,5, 5))
+    print(model.predict(data))
+
 if __name__ == "__main__":
     # debug1()
     # debug2()
-    debug3()            
+    debug3()
+    # debug4()

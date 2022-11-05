@@ -589,8 +589,8 @@ class LSTM(Layer):
             self.input_shape = input_shape if len(input_shape) == 2 else (input_shape[1],input_shape[2])
             self.set_weight_and_bias(self.input_shape)
         self.input = None
-        self.hidden_state = np.zeros((self.units,))
-        self.cell_state = np.zeros((self.units,))
+        # self.hidden_state = np.zeros((self.units,))
+        # self.cell_state = np.zeros((self.units,))
         self.output = self.units
     
     def set_weight_and_bias(self, input_dim: Tuple[int]):
@@ -724,6 +724,8 @@ class LSTM(Layer):
         """
         if len(x.shape) == 2:
             x = x.reshape((1,*x.shape))
+        self.hidden_state = np.zeros((x.shape[0],self.units))
+        self.cell_state = np.zeros((x.shape[0],self.units))
         self.input = x
         n_batch = x.shape[0]
         output = np.zeros((n_batch,x.shape[1],self.units))
