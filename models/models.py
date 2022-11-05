@@ -55,6 +55,9 @@ class Model:
     def save(self,path):
         pass
 
+    def summary(self):
+        pass
+
 class Sequential(Model):
     """
     [DESC]
@@ -111,3 +114,12 @@ class Sequential(Model):
             result_dict["layers"].append(l.create_dict())
         with open(path, "w") as f:
             json.dump(result_dict, f)
+    
+    def summary(self):
+        res = ""
+        res += "Summary of the model : \n"
+        res += "Model: " + self.__class__.__name__ + "\n"
+        res += "Layers : \n"
+        for layer in self.layers:
+            res += layer.__class__.__name__ + " - " + str(layer.n_params) + " parameters\n"
+        return res

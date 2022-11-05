@@ -18,6 +18,8 @@ def create_model(random_seed_1:int,random_seed_2:int):
     dense2 = Dense(units=1, activation='relu')
     model.add(dense2)
 
+    print(model.summary())
+
     return model
 
 def autoregressive_forecast(train,test,colname,window_size,model,derivative=0):
@@ -34,13 +36,10 @@ def autoregressive_forecast(train,test,colname,window_size,model,derivative=0):
     if window_size > series.shape[0]:
          raise Exception(f"Window size cannot be more than series size. Window size : {window_size} , Series size : {series.shape[0]}")
     
-    result = series.tail(window_size).values # .reshape(1,-1)        
+    result = series.tail(window_size).values       
     for i in range(len(test)):
-        # print(result[-window_size:].reshape(1,-1,1).shape)
-        # exit()
         model_input = result[-window_size:].reshape(1,-1,1)   
         predicted = model.predict(model_input)[0]
-        # print(predicted)
         result = np.append(result,predicted)    
     result = result[window_size:]        
     result_derivative = {}
@@ -66,6 +65,6 @@ if __name__ == "__main__":
     df = pd.DataFrame()
     for i in columns:        
         model_copy = model
-        df[i] = autoregressive_forecast(train,test,i,32,model_copy,derivative=0)    
+        df[i] = autoregressive_forecast(train,test,i,32,model_copy,derivative=0)
     
     print(df.__repr__())

@@ -22,6 +22,7 @@ class Layer:
     def __init__(self):
         self.output_dim = None
         self.hidden_state = None
+        self.n_params = 0
 
     def forward(self, x : np.ndarray) -> np.ndarray:
         return x
@@ -100,6 +101,7 @@ class Dense(Layer):
         """
         self.weights = np.random.randn(self.input_shape[0], self.units)
         self.bias = np.random.randn(self.units)
+        self.n_params = self.units * self.input_shape[0] + self.units
     
     def set_weight_and_bias(self, input_dim : int):
         """
@@ -118,6 +120,7 @@ class Dense(Layer):
             print(self.units)
             raise e
         self.bias = np.random.randn(self.units)
+        self.n_params = self.units * input_dim + self.units
         return super().set_weight_and_bias(input_dim)
 
     def forward(self, x : np.ndarray) -> np.ndarray:
@@ -228,6 +231,7 @@ class Conv2D(Layer):
         kernel_height, kernel_width = self.kernel_size
         self.weights = np.random.randn(channels, self.filters, kernel_height, kernel_width )
         self.bias = np.zeros(self.output_shape)
+        self.n_params = self.filters * kernel_height * kernel_width * channels + self.filters
     
     def _convolution_per_channel(self, i_channel : int, x : np.ndarray) -> np.ndarray:
         """
@@ -534,7 +538,6 @@ class Pooling(Layer):
         result_dimension = (self.stride * (error_term.shape[0] - 1) - 2 * self.padding \
              + self.filter_size_x, self.stride * (error_term.shape[1] - 1) - 2 * self.padding + self.filter_size_y)
         result = np.zeros(result_dimension)
-        # print("Error term matrix dimension : ",error_term.shape)
         for i in range(error_term.shape[0]):
             for j in range(error_term.shape[1]):
                 row1 = i*self.stride
@@ -617,6 +620,7 @@ class LSTM(Layer):
             "bo" : np.random.randn(self.units),
         }
         self.output_dim = self.units if not self.return_sequences else (input_dim[0],self.units)
+        self.n_params = 4*(self.units*feature_dim + self.units**2 + self.units)
         return super().set_weight_and_bias(input_dim)
     
     def _count_input_gate(self,x : np.ndarray) -> np.ndarray:
