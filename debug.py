@@ -117,8 +117,10 @@ def debug3():
     model.add(lstm1)
     lstm2 = LSTM(units=5, return_sequences=False, random_seed=0)      
     model.add(lstm2)
-    # dense = Dense(units=1, activation='sigmoid')
-    # model.add(dense)
+    dense1 = Dense(units=64, activation='linear')
+    model.add(dense1)
+    dense2 = Dense(units=1, activation='relu')
+    model.add(dense2)
 
     # data = np.random.random((5,20, 10))        
     # for i in range(len(test)):
