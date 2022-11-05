@@ -45,10 +45,11 @@ def autoregressive_forecast(train,test,colname,window_size,model,derivative=0):
     
     result = series.tail(window_size).values # .reshape(1,-1)        
     for i in range(len(test)):
-        model_input = result[-window_size:].reshape(1,-1)   
-        print(model_input.shape)     
+        # print(result[-window_size:].reshape(1,-1,1).shape)
+        # exit()
+        model_input = result[-window_size:].reshape(1,-1,1)   
         predicted = model.predict(model_input)[0]
-        print(predicted)
+        # print(predicted)
         result = np.append(result,predicted)    
     result = result[window_size:]        
     result_derivative = {}
@@ -107,12 +108,12 @@ def debug3():
     train = pd.read_csv(train_path)
     test = pd.read_csv(test_path)
     # ["Open","Close","High","Low","Volume"]
-    train_windowed = window_dataset(train,"Close",5,with_y=True,derivative=0)    
+    train_windowed = window_dataset(train,"Close",5,with_y=True,derivative=0)
     # print(np.array(train_windowed))
     model = Sequential()
-    window_size = 20
+    # window_size = 20
     print(len(test))
-    lstm1 = LSTM(units=5, input_shape=(1, 5, 5), return_sequences=True, random_seed=0)    
+    lstm1 = LSTM(units=5, input_shape=(1, 5, 1), return_sequences=True, random_seed=0)    
     # lstm1 = LSTM(units=5, input_shape=(5, 20, 10), return_sequences=True, random_seed=0)    
     model.add(lstm1)
     lstm2 = LSTM(units=5, return_sequences=False, random_seed=0)      
@@ -128,16 +129,16 @@ def debug3():
     #     predicted = model.predict(model_input)[0]
     #     result = np.append(result,predicted)
     predict_close = autoregressive_forecast(train,test,"Close",5,model,derivative=0)
-    predict_Open = autoregressive_forecast(train,test,"Open",5,model,derivative=0)
-    predict_High = autoregressive_forecast(train,test,"High",5,model,derivative=0)
-    predict_Low = autoregressive_forecast(train,test,"Low",5,model,derivative=0)
-    predict_Volume = autoregressive_forecast(train,test,"Volume",5,model,derivative=0)
+    # predict_Open = autoregressive_forecast(train,test,"Open",5,model,derivative=0)
+    # predict_High = autoregressive_forecast(train,test,"High",5,model,derivative=0)
+    # predict_Low = autoregressive_forecast(train,test,"Low",5,model,derivative=0)
+    # predict_Volume = autoregressive_forecast(train,test,"Volume",5,model,derivative=0)
     df = pd.DataFrame()
     df["Close"] = predict_close
-    df["Open"] = predict_Open
-    df["High"] = predict_High
-    df["Low"] = predict_Low
-    df["Volume"] = predict_Volume
+    # df["Open"] = predict_Open
+    # df["High"] = predict_High
+    # df["Low"] = predict_Low
+    # df["Volume"] = predict_Volume
     # # print(model.predict(train_windowed.values))
     # # print(model.predict(data))
     print(df)
