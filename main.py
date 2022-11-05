@@ -68,4 +68,4 @@ if __name__ == "__main__":
         model_copy = model
         df[i] = autoregressive_forecast(train,test,i,5,model_copy,derivative=0)    
     
-    print(df)
+    print(df.__repr__())
